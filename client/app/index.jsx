@@ -2,44 +2,12 @@ var React = require('react');
 var {component} = require('omniscient-tools');
 var immstruct = require('immstruct');
 var Immutable = require('immutable');
-var Firebase = require('firebase');
 
-var firebase = new Firebase('https://gratitude-1337.firebaseio.com/');
-var node = firebase.child('gratitude');
-
-function loadData(node, cursor) {
-  node.once('load', function(firebaseSnapshot) {
-
-    var value = firebaseSnapshot.val() || [];
-    cursor.update(function() {
-      return Immutable.fromJS(value);
-    });
-  });
-}
-
-function saveData(node, cursor) {
-  var toSave = cursor.toJS();
-  node.set(toSave);
-}
 
 var data = immstruct({
   gratitudes: [],
   editingGratitude: {}
 });
-
-function saveIfGratitudesChange(path, newValue, oldValue) {
-  if (path && path[0] == 'gratitudes') {
-    // save to firebase woo!
-    saveData(node, data.cursor('gratitude'));
-  }
-  console.log('path is', path);
-  console.log('new value is', newValue);
-}
-
-data.on('change', saveIfGratitudesChange);
-data.on('add', saveIfGratitudesChange);
-data.on('delete', saveIfGratitudesChange);
-
 
 var App = component(function(props) {
   return (
@@ -131,4 +99,3 @@ function render() {
 
 data.on('swap', render);
 render();
-loadData(node, data.cursor('gratitudes'));
